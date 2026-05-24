@@ -8,9 +8,7 @@ BEGIN
     SET NOCOUNT ON;
 
     IF EXISTS (
-        SELECT 1
-        FROM inserted i
-        WHERE (
+        SELECT 1 FROM inserted i WHERE (
             SELECT COUNT(*)
             FROM dbo.teaches t
             WHERE t.ID = i.ID
