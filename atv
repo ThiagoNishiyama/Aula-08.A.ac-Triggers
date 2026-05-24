@@ -1,23 +1,24 @@
-/*
-   QUESTÃO 01 - Trigger dbo.lost_credits
-   Objetivo:
-   Ao excluir um curso da tabela takes, subtrair os créditos
-   desse curso do total de créditos do aluno (student.tot_cred)
-   */
+/* Questão 01 */
 
-CREATE TRIGGER dbo.lost_credits
-ON dbo.takes
-AFTER DELETE
+CREATE TRIGGER dbo.trigger_prevent_assignment_teaches
+ON dbo.teaches
+AFTER INSERT, UPDATE
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    UPDATE s
-    SET s.tot_cred = s.tot_cred - c.credits
-    FROM dbo.student s
-         INNER JOIN deleted d
-            ON s.ID = d.ID
-         INNER JOIN dbo.course c
-            ON c.course_id = d.course_id;
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE (
+            SELECT COUNT(*)
+            FROM dbo.teaches t
+            WHERE t.ID = i.ID
+              AND t.year = i.year
+        ) > 2
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+    END
 END;
 GO
